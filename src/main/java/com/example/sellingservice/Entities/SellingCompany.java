@@ -2,14 +2,18 @@ package com.example.sellingservice.Entities;
 
 import jakarta.ejb.Stateful;
 import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 
 @Entity
 @Table(name="sellingCompany")
 @Stateful
-public class SellingCompany {
+@SessionScoped
+public class SellingCompany implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="id")
@@ -17,12 +21,15 @@ public class SellingCompany {
     private String role;
     private String username;
     private String password;
-    @OneToMany(mappedBy="sellingCompany")
-    ArrayList<Product> products;
+
+    @OneToMany(mappedBy="sellingCompany",fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    Set<Product> products;
+
 
     @ManyToOne
     @JoinColumn(name="admin_id")
     private Admin admin;
+
 
     public Long getId() {
         return id;
@@ -56,11 +63,11 @@ public class SellingCompany {
         this.password = password;
     }
 
-    public ArrayList<Product> getProducts() {
+    public Set<Product> getProducts() {
         return products;
     }
 
-    public void setProducts(ArrayList<Product> products) {
+    public void setProducts(Set<Product> products) {
         this.products = products;
     }
 
@@ -72,3 +79,5 @@ public class SellingCompany {
         this.admin = admin;
     }
 }
+
+

@@ -1,16 +1,18 @@
 package com.example.sellingservice.Entities;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name="product")
-public class Product {
+public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="id")
     private Long id;
     String name;
     int price;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="SellingCompany_id")
     private SellingCompany sellingCompany;
 
@@ -40,5 +42,13 @@ public class Product {
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public SellingCompany getSellingCompany() {
+        return sellingCompany;
+    }
+
+    public void setSellingCompany(SellingCompany sellingCompany) {
+        this.sellingCompany = sellingCompany;
     }
 }

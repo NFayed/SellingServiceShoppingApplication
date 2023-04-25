@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Set;
 
 @Entity
 @Table(name="admin")
@@ -28,7 +29,7 @@ public class Admin implements Serializable {
 
 
     @OneToMany(mappedBy="admin")
-    ArrayList<SellingCompany> sellingCompanies;
+    Set<SellingCompany> sellingCompanies;
 
     //ArrayList<Order> currentOrders;
 
@@ -58,5 +59,13 @@ public class Admin implements Serializable {
 
     public Long getId() {
         return id;
+    }
+
+    public Set<SellingCompany> getSellingCompanies() {
+        return sellingCompanies;
+    }
+
+    public void setSellingCompanies(Set<SellingCompany> sellingCompanies) {
+        this.sellingCompanies = sellingCompanies;
     }
 }

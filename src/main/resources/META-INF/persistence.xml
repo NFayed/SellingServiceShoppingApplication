@@ -18,6 +18,7 @@
       <property name="hibernate.show_sql" value="true"/>
       <property name="hibernate.format_sql" value="true"/>
       <property name="hibernate.ddl.auto" value="create-drop"/>
+      <!-- <property name="hibernate.classloading.use_current_tccl_as_parent=false" value="false"/>-->
     </properties>
   </persistence-unit>
 </persistence>
