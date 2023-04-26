@@ -1,18 +1,18 @@
 package com.example.sellingservice.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.ejb.Stateful;
-import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Set;
 
 @Entity
 @Table(name="sellingCompany")
 @Stateful
 @SessionScoped
+@JsonIgnoreProperties("products")
 public class SellingCompany implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -78,6 +78,13 @@ public class SellingCompany implements Serializable {
     public void setAdmin(Admin admin) {
         this.admin = admin;
     }
+
+    //add
+    public void addProduct(Product product){
+        products.add(product);
+    }
+
+
 }
 
 

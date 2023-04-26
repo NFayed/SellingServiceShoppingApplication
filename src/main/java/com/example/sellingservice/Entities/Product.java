@@ -16,7 +16,14 @@ public class Product implements Serializable {
     @JoinColumn(name="SellingCompany_id")
     private SellingCompany sellingCompany;
 
+    //add
+    private boolean isAvailableForSale;
+    private int quantity;
+    private int quantitySold;
+
     public Product() {
+        quantitySold=0;
+        isAvailableForSale=true;
     }
 
 
@@ -51,4 +58,30 @@ public class Product implements Serializable {
     public void setSellingCompany(SellingCompany sellingCompany) {
         this.sellingCompany = sellingCompany;
     }
+
+    //add
+    public boolean getIsAvailableForSale() {
+        return isAvailableForSale;
+    }
+
+    public void setIsAvailableForSale(boolean isAvailableForSale) {
+        this.isAvailableForSale = isAvailableForSale;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity=quantity;
+    }
+
+    public void setQuantitySold(int quantitySold) {
+        this.quantitySold=quantitySold;
+    }
+
+    public int getQuantitySold() {
+        return quantitySold;
+    }
+
 }
