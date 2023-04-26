@@ -8,6 +8,7 @@
     <class>com.example.sellingservice.Entities.Admin</class>
     <class>com.example.sellingservice.Entities.Product</class>
     <class>com.example.sellingservice.Entities.SellingCompany</class>
+    <class>com.example.sellingservice.Entities.CustomerDTO</class>
     <!-- other classes -->
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

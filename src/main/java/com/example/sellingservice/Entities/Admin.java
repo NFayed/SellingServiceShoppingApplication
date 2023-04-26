@@ -6,6 +6,15 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.persistence.*;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Set;
+
 @Entity
 @Table(name="admin")
 @Stateless
@@ -27,10 +36,9 @@ public class Admin implements Serializable {
     }
 
 
-    @OneToMany(mappedBy="admin")
+    @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
+    //@JsonIgnore
     Set<SellingCompany> sellingCompanies;
-
-    //ArrayList<Order> currentOrders;
 
     public Admin() {
     }

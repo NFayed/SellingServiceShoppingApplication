@@ -26,7 +26,7 @@ public class SellingCompany implements Serializable {
     Set<Product> products;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="admin_id")
     private Admin admin;
 
@@ -80,7 +80,7 @@ public class SellingCompany implements Serializable {
     }
 
     //add
-    public void addProduct(Product product){
+   public void addProduct(Product product){
         products.add(product);
     }
 
