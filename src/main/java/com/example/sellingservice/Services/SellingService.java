@@ -2,9 +2,16 @@ package com.example.sellingservice.Services;
 
 import com.example.sellingservice.Entities.Product;
 import com.example.sellingservice.Entities.SellingCompany;
+import com.example.sellingservice.Entities.SellingRequest;
+import com.example.sellingservice.Entities.SellingRequestMDB;
 import com.example.sellingservice.SellingInput;
+import jakarta.annotation.Resource;
 import jakarta.ejb.Stateful;
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSContext;
+import jakarta.jms.ObjectMessage;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -17,6 +24,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 
@@ -115,7 +123,30 @@ public class    SellingService  extends Application implements Serializable{
         entityManager.merge(product);
         return "product sold successfully.";
     }
+   /* @PUT
+    @Path("sellproduct/{id}")
+    public String SellProduct(@PathParam("id") int id) {
+        Product product = entityManager.find(Product.class, id);
+        SellingRequest sellingRequest = new SellingRequest();
+        sellingRequest.setProduct(entityManager.find(Product.class,product.getId()));
+        sellingRequest.setSellingCompany(entityManager.find(SellingCompany.class,selling.getId()));
+        // set the customer name here
+        sendSellingRequest(sellingRequest);
+        return "selling request sent successfully.";
+    }
+    @Inject
+    private JMSContext context;
+    @Resource(mappedName = "jms/sellingRequestsQueue")
+    private Queue queue;
 
+    public void sendSellingRequest(SellingRequest sellingRequest) {
+        try {
+            ObjectMessage message = context.createObjectMessage(sellingRequest);
+            context.createProducer().send((Destination) queue, message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
     @GET
     @Path("{username}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -127,6 +158,11 @@ public class    SellingService  extends Application implements Serializable{
         }
     }
 
-
+    @GET
+    @Path("hello")
+    @Produces("text/plain")
+    public String hello() {
+        return "Hello, World!";
+    }
 
 }

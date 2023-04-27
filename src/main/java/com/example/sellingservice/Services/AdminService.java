@@ -2,6 +2,7 @@ package com.example.sellingservice.Services;
 import com.example.sellingservice.AdminInput;
 import com.example.sellingservice.Entities.Admin;
 import com.example.sellingservice.Entities.SellingCompany;
+import com.example.sellingservice.Entities.ShippingCompany;
 import com.example.sellingservice.SellingInput;
 import jakarta.ejb.Stateful;
 import jakarta.ejb.Stateless;
@@ -25,7 +26,7 @@ import java.util.Set;
 
 @Path("admin")
 @Stateless
-public class AdminService implements Serializable {
+public class AdminService  implements Serializable {
     //@PersistenceContext(unitName = "default")
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -73,6 +74,19 @@ public class AdminService implements Serializable {
         }
         return "selling company already exists!";
     }
+    @POST
+    @Path("createshipping/{adminId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String addShipping(ShippingCompany a, @PathParam("adminId") String adminId) {
+        ShippingCompany s1 = getShippingByNameFun(a.getUsername());
+        if(s1== null) {
+            a.setAdmin(entityManager.find(Admin.class,adminId));
+            entityManager.persist(a);
+            return "shipping company added successfully.";
+        }
+        return "shipping company already exists!";
+    }
+
      /*@GET
      @Path("getallselling/{adminId}")
      @Produces(MediaType.APPLICATION_JSON)
@@ -119,6 +133,17 @@ public class AdminService implements Serializable {
                         "SELECT u from SellingCompany u WHERE u.username = :username", SellingCompany.class).
                 setParameter("username", username).getSingleResult();
         return sellingCompany;
+    }
+    catch(Exception e){
+        return null;
+    }
+    }
+    public ShippingCompany getShippingByNameFun(String username)
+    { 	try {
+        ShippingCompany shippingCompany = entityManager.createQuery(
+                        "SELECT u from ShippingCompany u WHERE u.username = :username", ShippingCompany.class).
+                setParameter("username", username).getSingleResult();
+        return shippingCompany;
     }
     catch(Exception e){
         return null;

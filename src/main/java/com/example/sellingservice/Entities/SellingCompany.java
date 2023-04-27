@@ -80,7 +80,7 @@ public class SellingCompany implements Serializable {
     }
 
     //add
-   public void addProduct(Product product){
+    public void addProduct(Product product){
         products.add(product);
     }
 

@@ -39,6 +39,9 @@ public class Admin implements Serializable {
     @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
     //@JsonIgnore
     Set<SellingCompany> sellingCompanies;
+    @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
+    //@JsonIgnore
+    Set<ShippingCompany> shippingCompanies;
 
     public Admin() {
     }

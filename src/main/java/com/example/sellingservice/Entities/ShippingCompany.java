@@ -14,7 +14,9 @@ public class ShippingCompany implements Serializable {
     private String username;
     private String password;
     private String location;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="admin_id")
+    private Admin admin;
     public ShippingCompany() {
     }
 
@@ -56,5 +58,13 @@ public class ShippingCompany implements Serializable {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public Admin getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 }
