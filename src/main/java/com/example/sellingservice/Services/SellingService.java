@@ -5,27 +5,30 @@ import com.example.sellingservice.Entities.SellingCompany;
 import com.example.sellingservice.SellingInput;
 import jakarta.ejb.Stateful;
 import jakarta.enterprise.context.SessionScoped;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 
 @Path("selling")
 @Stateful
 @SessionScoped
-public class SellingService implements Serializable {
+public class    SellingService  extends Application implements Serializable{
     //@PersistenceContext(unitName = "default")
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     SellingCompany selling;
+
 
     @POST
     @Path("signup")
@@ -37,28 +40,31 @@ public class SellingService implements Serializable {
 
     //1. Login into the system using the generated credentials as sent by the admin
     @POST
-    //@RolesAllowed({"SellingCompany"})
+//@RolesAllowed({"SellingCompany"})
     @Path("login")
-    public String login(SellingInput s, @Context HttpServletRequest request) {
+    public Response login(SellingInput s, @Context HttpServletRequest request) {
         selling = getSellingByNameFun(s.getUsername());
         if (selling != null) {
             if (selling.getPassword().equals(s.getPassword())) {
                 HttpSession session = request.getSession(true);
                 session.setAttribute("selling", selling);
-                return "Selling company logged in";
+                return Response.status(Response.Status.OK).entity("Selling company logged in").build();
             } else {
-                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+                return Response.status(Response.Status.BAD_REQUEST).entity("Incorrect password").build();
             }
         } else {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
+            return Response.status(Response.Status.FORBIDDEN).entity("Invalid username").build();
+        }
+    }
+    public SellingCompany getSellingByNameFun(String username) {
+        List<SellingCompany> results = entityManager.createQuery("SELECT u from SellingCompany u WHERE u.username = :username", SellingCompany.class).setParameter("username", username).getResultList();
+        if (!results.isEmpty()) {
+            return results.get(0);
+        } else {
+            return null;
         }
     }
 
-    public SellingCompany getSellingByNameFun(String username) {
-        SellingCompany sellingCompany = entityManager.createQuery("SELECT u from SellingCompany u WHERE u.username = :username", SellingCompany.class).setParameter("username", username).getSingleResult();
-        return sellingCompany;
-
-    }
 
     /////////////////////////////////////////////////////////////
     //2. View products that are currently offered for sale.
@@ -120,6 +126,7 @@ public class SellingService implements Serializable {
             return null;
         }
     }
+
 
 
 }
