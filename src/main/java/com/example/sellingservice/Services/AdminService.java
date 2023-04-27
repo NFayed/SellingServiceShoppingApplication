@@ -73,8 +73,7 @@ public class AdminService implements Serializable {
         }
         return "selling company already exists!";
     }
-
-    /* @GET
+     /*@GET
      @Path("getallselling/{adminId}")
      @Produces(MediaType.APPLICATION_JSON)
      public List<SellingCompany> getAllSellingCompaniesByAdminId(@PathParam("adminId") Long adminId) {
@@ -82,6 +81,7 @@ public class AdminService implements Serializable {
          query.setParameter("adminId", adminId);
          return query.getResultList();
      }*/
+
     @GET
     @Path("{username}")
     @Produces(MediaType.APPLICATION_JSON)
