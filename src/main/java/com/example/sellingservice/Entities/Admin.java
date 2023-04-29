@@ -1,6 +1,8 @@
 package com.example.sellingservice.Entities;
 
-import jakarta.ejb.Stateless;
+import com.example.sellingservice.Entities.SellingCompany;
+import com.example.sellingservice.Entities.ShippingCompany;
+import jakarta.ejb.*;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -17,7 +19,7 @@ import java.util.Set;
 
 @Entity
 @Table(name="admin")
-@Stateless
+@Singleton
 public class Admin implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -37,11 +39,12 @@ public class Admin implements Serializable {
 
 
     @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
-    //@JsonIgnore
+    @JsonIgnore
     Set<SellingCompany> sellingCompanies;
     @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
-    //@JsonIgnore
+    @JsonIgnore
     Set<ShippingCompany> shippingCompanies;
+
 
     public Admin() {
     }
@@ -78,4 +81,14 @@ public class Admin implements Serializable {
     public void setSellingCompanies(Set<SellingCompany> sellingCompanies) {
         this.sellingCompanies = sellingCompanies;
     }
+
+    public Set<ShippingCompany> getShippingCompanies() {
+        return shippingCompanies;
+    }
+
+    public void setShippingCompanies(Set<ShippingCompany> shippingCompanies) {
+        this.shippingCompanies = shippingCompanies;
+    }
+
+
 }

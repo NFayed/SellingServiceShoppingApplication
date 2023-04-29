@@ -1,11 +1,9 @@
 package com.example.sellingservice.Services;
+
 import com.example.sellingservice.AdminInput;
-import com.example.sellingservice.Entities.Admin;
-import com.example.sellingservice.Entities.SellingCompany;
-import com.example.sellingservice.Entities.ShippingCompany;
+import com.example.sellingservice.Entities.*;
 import com.example.sellingservice.SellingInput;
-import jakarta.ejb.Stateful;
-import jakarta.ejb.Stateless;
+import jakarta.ejb.*;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -25,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 @Path("admin")
-@Stateless
+@Singleton
 public class AdminService  implements Serializable {
     //@PersistenceContext(unitName = "default")
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
@@ -63,6 +61,7 @@ public class AdminService  implements Serializable {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
     }
+
     @POST
     @Path("createselling")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -87,14 +86,24 @@ public class AdminService  implements Serializable {
         return "shipping company already exists!";
     }
 
-     /*@GET
-     @Path("getallselling/{adminId}")
-     @Produces(MediaType.APPLICATION_JSON)
-     public List<SellingCompany> getAllSellingCompaniesByAdminId(@PathParam("adminId") Long adminId) {
-         TypedQuery<SellingCompany> query = entityManager.createQuery("SELECT sc FROM SellingCompany sc WHERE sc.admin.id = :adminId", SellingCompany.class);
-         query.setParameter("adminId", adminId);
-         return query.getResultList();
-     }*/
+    @GET
+    @Path("getallselling/{adminId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<SellingCompany> getAllSellingCompaniesByAdminId(@PathParam("adminId") String adminId) {
+        TypedQuery<SellingCompany> query = entityManager.createQuery(
+                "SELECT sc FROM SellingCompany sc WHERE sc.admin.id = :adminId", SellingCompany.class);
+        query.setParameter("adminId", Long.parseLong(adminId));
+        return query.getResultList();
+    }
+    @GET
+    @Path("getallshipping/{adminId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ShippingCompany> getAllShippingCompaniesByAdminId(@PathParam("adminId") String adminId) {
+        TypedQuery<ShippingCompany> query = entityManager.createQuery(
+                "SELECT sc FROM ShippingCompany sc WHERE sc.admin.id = :adminId", ShippingCompany.class);
+        query.setParameter("adminId", Long.parseLong(adminId));
+        return query.getResultList();
+    }
 
     @GET
     @Path("{username}")

@@ -2,16 +2,11 @@ package com.example.sellingservice.Services;
 
 import com.example.sellingservice.Entities.Product;
 import com.example.sellingservice.Entities.SellingCompany;
-import com.example.sellingservice.Entities.SellingRequest;
-import com.example.sellingservice.Entities.SellingRequestMDB;
 import com.example.sellingservice.SellingInput;
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateful;
 import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Inject;
-import jakarta.jms.Destination;
-import jakarta.jms.JMSContext;
-import jakarta.jms.ObjectMessage;
+import jakarta.jms.*;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -21,11 +16,10 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import javax.naming.InitialContext;
+//import javax.naming.Context;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 
 
 @Path("selling")
@@ -36,6 +30,8 @@ public class    SellingService  extends Application implements Serializable{
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     SellingCompany selling;
+    @Resource(mappedName = "java:/jms/queue/orderQueue")
+    private Queue queue;
 
 
     @POST
@@ -50,7 +46,7 @@ public class    SellingService  extends Application implements Serializable{
     @POST
 //@RolesAllowed({"SellingCompany"})
     @Path("login")
-    public Response login(SellingInput s, @Context HttpServletRequest request) {
+    public Response login(SellingInput s,  @Context HttpServletRequest request) {
         selling = getSellingByNameFun(s.getUsername());
         if (selling != null) {
             if (selling.getPassword().equals(s.getPassword())) {
@@ -104,16 +100,17 @@ public class    SellingService  extends Application implements Serializable{
                 selling.getProducts().add(product);
                 product.setSellingCompany(selling);
                 entityManager.persist(product);
-                return "product added successfully.";
+                System.out.println("Product added with ID: " + product.getId()); // Add this line
+                return "Product added successfully.";
             }
         }
-        return "invalid product.";
+        return "Invalid product.";
     }
 
     /////////////////////////////////////////////////////////////
     //needed by other services
     @PUT
-    @Path("sellproduct/{id}")
+        @Path("sellproduct/{id}")
     public String Sell(@PathParam("id") int id) {
         Product product = entityManager.find(Product.class, id);
         product.setQuantity(product.getQuantity() - 1);
@@ -123,30 +120,27 @@ public class    SellingService  extends Application implements Serializable{
         entityManager.merge(product);
         return "product sold successfully.";
     }
-   /* @PUT
-    @Path("sellproduct/{id}")
-    public String SellProduct(@PathParam("id") int id) {
-        Product product = entityManager.find(Product.class, id);
-        SellingRequest sellingRequest = new SellingRequest();
-        sellingRequest.setProduct(entityManager.find(Product.class,product.getId()));
-        sellingRequest.setSellingCompany(entityManager.find(SellingCompany.class,selling.getId()));
-        // set the customer name here
-        sendSellingRequest(sellingRequest);
-        return "selling request sent successfully.";
-    }
-    @Inject
-    private JMSContext context;
-    @Resource(mappedName = "jms/sellingRequestsQueue")
-    private Queue queue;
 
-    public void sendSellingRequest(SellingRequest sellingRequest) {
+    @PUT
+    @Path("/sendOrder/{request}")
+    public void submitOrder(@PathParam("request") String request) {
         try {
-            ObjectMessage message = context.createObjectMessage(sellingRequest);
-            context.createProducer().send((Destination) queue, message);
+            javax.naming.Context context = new InitialContext();
+            ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("java:/ConnectionFactory");
+            Connection connection = connectionFactory.createConnection();
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageProducer producer = session.createProducer(this.queue);
+            TextMessage message = session.createTextMessage();
+            System.out.println("Sending the following order request: " + request);
+            message.setText(request);
+            producer.send(message);
+            session.close();
+            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
+    }
+
     @GET
     @Path("{username}")
     @Produces(MediaType.APPLICATION_JSON)

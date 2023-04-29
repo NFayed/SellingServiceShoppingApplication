@@ -9,7 +9,7 @@ public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="id")
-    private Long id;
+    private int id;
     String name;
     int price;
     @ManyToOne(fetch = FetchType.EAGER)
@@ -27,16 +27,25 @@ public class Product implements Serializable {
     }
 
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public boolean isAvailableForSale() {
+        return isAvailableForSale;
+    }
+
+    public void setAvailableForSale(boolean availableForSale) {
+        isAvailableForSale = availableForSale;
     }
 
     public void setName(String name) {
