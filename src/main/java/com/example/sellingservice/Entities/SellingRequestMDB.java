@@ -23,28 +23,60 @@ public class SellingRequestMDB implements MessageListener {
 
 
 
+//@Override
+//public void onMessage(Message message) {
+//    try {
+//        String orderRequest = message.getBody(String.class);
+//        int productId = Integer.parseInt(orderRequest);
+//        System.out.println("Received message: " + productId);
+//        Product product = entityManager.find(Product.class, productId);
+//
+//        if (product != null) {
+//            System.out.println("Product: " + product.name);
+//            product.setQuantity(product.getQuantity() - 1);
+//            if (product.getQuantity() == 0) {
+//                product.setIsAvailableForSale(false);
+//            }
+//            entityManager.merge(product);
+//        } else {
+//            System.out.println("Product not found for ID: " + productId);
+//        }
+//    } catch (JMSException e) {
+//        e.printStackTrace();
+//    }
+//}
 @Override
 public void onMessage(Message message) {
     try {
-        String orderRequest = message.getBody(String.class);
-        int productId = Integer.parseInt(orderRequest);
-        System.out.println("Received message: " + productId);
-        Product product = entityManager.find(Product.class, productId);
+        if (message instanceof ObjectMessage) {
+            ObjectMessage objectMessage = (ObjectMessage) message;
+            customerAndOrderId customerAndOrderId = (customerAndOrderId) objectMessage.getObject();
 
-        if (product != null) {
-            System.out.println("Product: " + product.name);
-            product.setQuantity(product.getQuantity() - 1);
-            if (product.getQuantity() == 0) {
-                product.setIsAvailableForSale(false);
+            // Extract orderId and parse it as productId
+            String email = customerAndOrderId.getEmail();
+            int productId = customerAndOrderId.getOrderId();
+
+            System.out.println("Received message: " + productId);
+            Product product = entityManager.find(Product.class, productId);
+
+            if (product != null) {
+                System.out.println("Product: " + product.name);
+                product.setQuantity(product.getQuantity() - 1);
+                if (product.getQuantity() == 0) {
+                    product.setIsAvailableForSale(false);
+                }
+                entityManager.merge(product);
+            } else {
+                System.out.println("Product not found for ID: " + productId);
             }
-            entityManager.merge(product);
         } else {
-            System.out.println("Product not found for ID: " + productId);
+            System.out.println("Invalid message type received.");
         }
     } catch (JMSException e) {
         e.printStackTrace();
     }
 }
+
 
 }
 

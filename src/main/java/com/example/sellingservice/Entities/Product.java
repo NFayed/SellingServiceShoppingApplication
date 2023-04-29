@@ -20,6 +20,15 @@ public class Product implements Serializable {
     private boolean isAvailableForSale;
     private int quantity;
     private int quantitySold;
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public Product() {
         quantitySold=0;

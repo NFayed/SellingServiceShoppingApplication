@@ -2,6 +2,8 @@ package com.example.sellingservice.Services;
 
 import com.example.sellingservice.Entities.Product;
 import com.example.sellingservice.Entities.SellingCompany;
+
+import com.example.sellingservice.Entities.customerAndOrderId;
 import com.example.sellingservice.SellingInput;
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateful;
@@ -29,7 +31,7 @@ public class    SellingService  extends Application implements Serializable{
     //@PersistenceContext(unitName = "default")
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
-    SellingCompany selling;
+    static  SellingCompany selling;
     @Resource(mappedName = "java:/jms/queue/orderQueue")
     private Queue queue;
 
@@ -96,16 +98,23 @@ public class    SellingService  extends Application implements Serializable{
     public String addProduct(Product product, @Context HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {
-            if (selling != null) {
-                selling.getProducts().add(product);
-                product.setSellingCompany(selling);
+            System.out.println("Session is not null");
+            System.out.println("Session ID: " + session.getId());
+            SellingCompany selling2 = (SellingCompany) session.getAttribute("selling");
+            if (selling2 != null) {
+                System.out.println("Selling company: " + selling2);
+                selling2.getProducts().add(product);
+                product.setSellingCompany(selling2);
                 entityManager.persist(product);
-                System.out.println("Product added with ID: " + product.getId()); // Add this line
+                System.out.println("Product added with ID: " + product.getId());
                 return "Product added successfully.";
+            } else {
+                System.out.println("Selling company is null");
             }
         }
         return "Invalid product.";
     }
+
 
     /////////////////////////////////////////////////////////////
     //needed by other services
@@ -122,17 +131,20 @@ public class    SellingService  extends Application implements Serializable{
     }
 
     @PUT
-    @Path("/sendOrder/{request}")
-    public void submitOrder(@PathParam("request") String request) {
+    @Path("/sendOrder")
+    public void submitOrder(customerAndOrderId customerAndOrderId) {
         try {
             javax.naming.Context context = new InitialContext();
             ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("java:/ConnectionFactory");
             Connection connection = connectionFactory.createConnection();
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MessageProducer producer = session.createProducer(this.queue);
-            TextMessage message = session.createTextMessage();
-            System.out.println("Sending the following order request: " + request);
-            message.setText(request);
+
+            // Create an ObjectMessage and set the customerAndOrderId object
+            ObjectMessage message = session.createObjectMessage();
+            message.setObject(customerAndOrderId);
+
+            System.out.println("Sending the following order request: " + customerAndOrderId.getOrderId());
             producer.send(message);
             session.close();
             connection.close();
@@ -140,6 +152,8 @@ public class    SellingService  extends Application implements Serializable{
             e.printStackTrace();
         }
     }
+
+
 
     @GET
     @Path("{username}")
