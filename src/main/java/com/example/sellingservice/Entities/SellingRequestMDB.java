@@ -22,29 +22,6 @@ public class SellingRequestMDB implements MessageListener {
     EntityManager entityManager = entityManagerFactory.createEntityManager();
 
 
-
-//@Override
-//public void onMessage(Message message) {
-//    try {
-//        String orderRequest = message.getBody(String.class);
-//        int productId = Integer.parseInt(orderRequest);
-//        System.out.println("Received message: " + productId);
-//        Product product = entityManager.find(Product.class, productId);
-//
-//        if (product != null) {
-//            System.out.println("Product: " + product.name);
-//            product.setQuantity(product.getQuantity() - 1);
-//            if (product.getQuantity() == 0) {
-//                product.setIsAvailableForSale(false);
-//            }
-//            entityManager.merge(product);
-//        } else {
-//            System.out.println("Product not found for ID: " + productId);
-//        }
-//    } catch (JMSException e) {
-//        e.printStackTrace();
-//    }
-//}
 @Override
 public void onMessage(Message message) {
     try {

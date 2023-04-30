@@ -3,6 +3,8 @@ package com.example.sellingservice.Entities;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.List;
+
 @Entity
 @Table(name="Shipping Company")
 public class ShippingCompany implements Serializable {
@@ -10,14 +12,23 @@ public class ShippingCompany implements Serializable {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="id")
     private Long id;
-    private String role;
     private String username;
     private String password;
     private String location;
+    @OneToMany(mappedBy = "shippingCompany", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Product> products;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="admin_id")
     private Admin admin;
     public ShippingCompany() {
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 
     public Long getId() {
@@ -28,13 +39,6 @@ public class ShippingCompany implements Serializable {
         this.id = id;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     public String getUsername() {
         return username;

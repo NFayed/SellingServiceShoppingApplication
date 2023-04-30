@@ -31,7 +31,7 @@ public class    SellingService  extends Application implements Serializable{
     //@PersistenceContext(unitName = "default")
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
-    static  SellingCompany selling;
+
     @Resource(mappedName = "java:/jms/queue/orderQueue")
     private Queue queue;
 
@@ -49,6 +49,7 @@ public class    SellingService  extends Application implements Serializable{
 //@RolesAllowed({"SellingCompany"})
     @Path("login")
     public Response login(SellingInput s,  @Context HttpServletRequest request) {
+        SellingCompany selling;
         selling = getSellingByNameFun(s.getUsername());
         if (selling != null) {
             if (selling.getPassword().equals(s.getPassword())) {
@@ -103,7 +104,7 @@ public class    SellingService  extends Application implements Serializable{
             SellingCompany selling2 = (SellingCompany) session.getAttribute("selling");
             if (selling2 != null) {
                 System.out.println("Selling company: " + selling2);
-                selling2.getProducts().add(product);
+                selling2.addProduct(product);
                 product.setSellingCompany(selling2);
                 entityManager.persist(product);
                 System.out.println("Product added with ID: " + product.getId());

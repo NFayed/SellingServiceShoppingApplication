@@ -2,6 +2,7 @@ package com.example.sellingservice.Entities;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Table(name="product")
@@ -11,16 +12,41 @@ public class Product implements Serializable {
     @Column(name="id")
     private int id;
     String name;
+
     int price;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="SellingCompany_id")
     private SellingCompany sellingCompany;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="ShippingCompany_id")
+    private ShippingCompany shippingCompany;
+
+    @ManyToMany(mappedBy = "products")
+    Set<CustomerOrder> customerOrders;
+
+    public Set<CustomerOrder> getCustomerOrders() {
+        return customerOrders;
+    }
+
+    public void setCustomerOrders(Set<CustomerOrder> customerOrders) {
+        this.customerOrders = customerOrders;
+    }
 
     //add
     private boolean isAvailableForSale;
     private int quantity;
     private int quantitySold;
     private String imageUrl;
+    private boolean shipped;
+
+    public boolean isShipped() {
+        return shipped;
+    }
+
+    public void setShipped(boolean shipped) {
+        this.shipped = shipped;
+    }
 
     public String getImageUrl() {
         return imageUrl;
@@ -102,4 +128,11 @@ public class Product implements Serializable {
         return quantitySold;
     }
 
+    public ShippingCompany getShippingCompany() {
+        return shippingCompany;
+    }
+
+    public void setShippingCompany(ShippingCompany shippingCompany) {
+        this.shippingCompany = shippingCompany;
+    }
 }

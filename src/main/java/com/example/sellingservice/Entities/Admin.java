@@ -1,7 +1,7 @@
 package com.example.sellingservice.Entities;
 
 import com.example.sellingservice.Entities.SellingCompany;
-import com.example.sellingservice.Entities.ShippingCompany;
+//import com.example.sellingservice.Entities.ShippingCompany;
 import jakarta.ejb.*;
 import jakarta.persistence.*;
 
@@ -22,12 +22,16 @@ import java.util.Set;
 @Singleton
 public class Admin implements Serializable {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
     private String role;
     private String username;
     private String password;
+
+    public static void setInstance(Admin instance) {
+        Admin.instance = instance;
+    }
 
     public String getRole() {
         return role;
@@ -37,8 +41,16 @@ public class Admin implements Serializable {
         this.role = role;
     }
 
+    private static Admin instance;
 
-    @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
+    public static synchronized Admin getInstance() {
+        if (instance == null) {
+            instance = new Admin();
+        }
+        return instance;
+    }
+
+    @OneToMany(mappedBy = "admin", fetch = FetchType.EAGER)
     @JsonIgnore
     Set<SellingCompany> sellingCompanies;
     @OneToMany(mappedBy="admin",fetch = FetchType.EAGER)
@@ -81,14 +93,13 @@ public class Admin implements Serializable {
     public void setSellingCompanies(Set<SellingCompany> sellingCompanies) {
         this.sellingCompanies = sellingCompanies;
     }
-
-    public Set<ShippingCompany> getShippingCompanies() {
-        return shippingCompanies;
-    }
-
-    public void setShippingCompanies(Set<ShippingCompany> shippingCompanies) {
-        this.shippingCompanies = shippingCompanies;
-    }
-
-
 }
+
+//    public Set<ShippingCompany> getShippingCompanies() {
+//        return shippingCompanies;
+//    }
+//
+//    public void setShippingCompanies(Set<ShippingCompany> shippingCompanies) {
+//        this.shippingCompanies = shippingCompanies;
+//    }
+//}

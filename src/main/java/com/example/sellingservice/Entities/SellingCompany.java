@@ -6,6 +6,7 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -23,7 +24,7 @@ public class SellingCompany implements Serializable {
     private String password;
 
     @OneToMany(mappedBy="sellingCompany",fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-    Set<Product> products;
+    Set<Product> products = new HashSet<>();
 
 
     @ManyToOne(fetch = FetchType.EAGER)
