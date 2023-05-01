@@ -5,11 +5,9 @@ import jakarta.ejb.ActivationConfigProperty;
 import jakarta.ejb.MessageDriven;
 import jakarta.inject.Inject;
 import jakarta.jms.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
-import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Queue;
 @MessageDriven(
         activationConfig = {
@@ -27,32 +25,77 @@ public void onMessage(Message message) {
     try {
         if (message instanceof ObjectMessage) {
             ObjectMessage objectMessage = (ObjectMessage) message;
-            customerAndOrderId customerAndOrderId = (customerAndOrderId) objectMessage.getObject();
+            System.out.println("Received message: " + objectMessage.getObject());
 
+            CustomerOrder customerOrder = (CustomerOrder) objectMessage.getObject();
+
+            System.out.println("CustomerOrder: " + customerOrder);
+            System.out.println("Received message: " + customerOrder.getCustomerName() + " " + customerOrder.getCustomerAddress());
             // Extract orderId and parse it as productId
-            String email = customerAndOrderId.getEmail();
-            int productId = customerAndOrderId.getOrderId();
+            String name = customerOrder.getCustomerName();
+            String address = customerOrder.getCustomerAddress();
 
-            System.out.println("Received message: " + productId);
-            Product product = entityManager.find(Product.class, productId);
 
-            if (product != null) {
+            System.out.println("Received message: " + name + " " + address);
+            for (Product product : customerOrder.getProducts()) {
                 System.out.println("Product: " + product.name);
-                product.setQuantity(product.getQuantity() - 1);
-                if (product.getQuantity() == 0) {
-                    product.setIsAvailableForSale(false);
+                System.out.println("Product quantity: " + product.getQuantity());
+                if (product != null) {
+                    System.out.println("Product: " + product.name);
+                    product.setQuantity(product.getQuantity() - 1);
+                    if (product.getQuantity() == 0) {
+                        product.setIsAvailableForSale(false);
+                    }
+                    String customerAddress = customerOrder.getCustomerAddress();
+                    ShippingCompany shippingCompany = checkShippingAvailability(customerAddress);
+                    if (shippingCompany != null) {
+                        // Assign the shipping company to the order and update it
+                        customerOrder.setShippingCompany(shippingCompany);
+                        entityManager.merge(customerOrder);
+                        entityManager.merge(product);
+                        entityManager.flush();
+                    } else {
+                        System.out.println("No shipping company available for address: " + customerAddress);
+                    }
+
                 }
-                entityManager.merge(product);
-            } else {
-                System.out.println("Product not found for ID: " + productId);
+
+                else {
+                        System.out.println("Product not found for ID: " + product.getId());
+                    }
             }
-        } else {
+
+            }
+
+
+         else {
             System.out.println("Invalid message type received.");
         }
     } catch (JMSException e) {
         e.printStackTrace();
     }
 }
+
+    public ShippingCompany checkShippingAvailability(String location) {
+        try {
+            TypedQuery<ShippingCompany> query = entityManager.createQuery(
+                    "SELECT sc FROM ShippingCompany sc JOIN sc.locations l WHERE l = :location", ShippingCompany.class);
+            query.setParameter("location", location);
+            List<ShippingCompany> shippingCompanies = query.getResultList();
+
+            if (!shippingCompanies.isEmpty()) {
+                // Return the first available shipping company
+                return shippingCompanies.get(0);
+            } else {
+                // No shipping company available for the specified location
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
 
 }

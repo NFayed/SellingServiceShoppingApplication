@@ -1,9 +1,10 @@
 package com.example.sellingservice.Services;
 
+import com.example.sellingservice.Entities.CustomerOrder;
 import com.example.sellingservice.Entities.Product;
 import com.example.sellingservice.Entities.SellingCompany;
 
-import com.example.sellingservice.Entities.customerAndOrderId;
+
 import com.example.sellingservice.SellingInput;
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateful;
@@ -133,8 +134,9 @@ public class    SellingService  extends Application implements Serializable{
 
     @PUT
     @Path("/sendOrder")
-    public void submitOrder(customerAndOrderId customerAndOrderId) {
+    public void submitOrder(CustomerOrder customerOrder) {
         try {
+            System.out.println("Sending order request");
             javax.naming.Context context = new InitialContext();
             ConnectionFactory connectionFactory = (ConnectionFactory) context.lookup("java:/ConnectionFactory");
             Connection connection = connectionFactory.createConnection();
@@ -143,9 +145,9 @@ public class    SellingService  extends Application implements Serializable{
 
             // Create an ObjectMessage and set the customerAndOrderId object
             ObjectMessage message = session.createObjectMessage();
-            message.setObject(customerAndOrderId);
+            message.setObject(customerOrder);
 
-            System.out.println("Sending the following order request: " + customerAndOrderId.getOrderId());
+            System.out.println("Sending the following order request: " + customerOrder.getTotal());
             producer.send(message);
             session.close();
             connection.close();

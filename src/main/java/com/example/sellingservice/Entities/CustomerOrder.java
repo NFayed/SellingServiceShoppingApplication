@@ -3,11 +3,16 @@ package com.example.sellingservice.Entities;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
 @Table(name="CustomerOrder")
-public class CustomerOrder {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
+public class CustomerOrder implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="id")
@@ -15,14 +20,24 @@ public class CustomerOrder {
     boolean shipped;
     int total;
     boolean completed;
-    private String customerId;
+    private String customerName;
 
-    public String getCustomerId() {
-        return customerId;
+    public String getCustomerAddress() {
+        return customerAddress;
     }
 
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public void setCustomerAddress(String customerAddress) {
+        this.customerAddress = customerAddress;
+    }
+
+    String customerAddress;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -39,8 +54,8 @@ public class CustomerOrder {
     @ManyToMany
     @JoinTable(
             name = "ProductsInOrder",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "customerorder_id"))
+            joinColumns = @JoinColumn(name = "customerorder_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
     //@JsonIgnore
     Set<Product> products = new HashSet<>();
     public CustomerOrder() {}
