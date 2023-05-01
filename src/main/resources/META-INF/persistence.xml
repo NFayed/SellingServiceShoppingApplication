@@ -11,6 +11,7 @@
     <class>com.example.sellingservice.Entities.ShippingCompany</class>
     <class>com.example.sellingservice.Entities.ShippingRequest</class>
     <class>com.example.sellingservice.Entities.CustomerOrder</class>
+    <class>com.example.sellingservice.Entities.SellingCompanyOrder</class>
     <!-- other classes -->
     <properties>
       <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

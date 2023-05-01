@@ -1,8 +1,6 @@
 package com.example.sellingservice.Services;
 
-import com.example.sellingservice.Entities.CustomerOrder;
-import com.example.sellingservice.Entities.Product;
-import com.example.sellingservice.Entities.SellingCompany;
+import com.example.sellingservice.Entities.*;
 
 
 import com.example.sellingservice.SellingInput;
@@ -168,6 +166,70 @@ public class    SellingService  extends Application implements Serializable{
             return null;
         }
     }
+
+    @GET
+    @Path("/getOldOrders")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<SellingOrderOldResult> getOldOrders(@Context HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            System.out.println("Session is not null");
+            System.out.println("Session ID: " + session.getId());
+            SellingCompany sellingCompany = (SellingCompany) session.getAttribute("selling");
+            if (sellingCompany != null) {
+                System.out.println("Selling company: " + sellingCompany);
+
+                TypedQuery<SellingOrderOldResult> query = entityManager.createQuery(
+                                "SELECT new com.example.sellingservice.Entities.SellingOrderOldResult(sco, p) FROM SellingCompanyOrder sco JOIN Product p ON sco.productId = p.id WHERE p.sellingCompany = :sellingCompany",
+                                SellingOrderOldResult.class)
+                        .setParameter("sellingCompany", sellingCompany);
+
+                List<SellingOrderOldResult> results = query.getResultList();
+
+                if (!results.isEmpty()) {
+                    return results;
+                } else {
+                    System.out.println("No old orders found");
+                }
+            } else {
+                System.out.println("Selling company is null");
+            }
+        }
+        return null;
+    }
+
+    @GET
+    @Path("/getSellingCompanyProducts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Product> getSellingCompanyProducts(@Context HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            System.out.println("Session is not null");
+            System.out.println("Session ID: " + session.getId());
+            SellingCompany sellingCompany = (SellingCompany) session.getAttribute("selling");
+            if (sellingCompany != null) {
+                System.out.println("Selling company: " + sellingCompany);
+
+                TypedQuery<Product> query = entityManager.createQuery(
+                                "SELECT p FROM Product p WHERE p.sellingCompany = :sellingCompany",
+                                Product.class)
+                        .setParameter("sellingCompany", sellingCompany);
+
+                List<Product> results = query.getResultList();
+
+                if (!results.isEmpty()) {
+                    return results;
+                } else {
+                    System.out.println("No products found");
+                }
+            } else {
+                System.out.println("Selling company is null");
+            }
+        }
+        return null;
+    }
+
+
 
     @GET
     @Path("hello")

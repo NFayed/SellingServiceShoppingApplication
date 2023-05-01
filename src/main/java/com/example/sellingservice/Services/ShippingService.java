@@ -1,6 +1,8 @@
 package com.example.sellingservice.Services;
 import com.example.sellingservice.AdminInput;
 import com.example.sellingservice.Entities.CustomerOrder;
+import com.example.sellingservice.Entities.Product;
+import com.example.sellingservice.Entities.SellingCompanyOrder;
 import com.example.sellingservice.Entities.ShippingCompany;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -20,11 +22,11 @@ public class ShippingService implements Serializable {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-    static  ShippingCompany shippingCompany;
 
     @POST
     @Path("login")
     public String login(AdminInput a) {
+        ShippingCompany shippingCompany;
         shippingCompany = getShippingByName(a.getUsername());
         if (shippingCompany != null) {
             if (shippingCompany.getPassword().equals(a.getPassword())) {
@@ -54,6 +56,16 @@ public class ShippingService implements Serializable {
     public Response shipOrder(CustomerOrder customerOrder) {
         try {
             customerOrder.setShipped(true);
+
+            for (Product product : customerOrder.getProducts()) {
+                SellingCompanyOrder sellingCompanyOrder = new SellingCompanyOrder();
+                sellingCompanyOrder.setShippingCompanyName(customerOrder.getShippingCompany().getUsername());
+                sellingCompanyOrder.setCustomerName(customerOrder.getCustomerName());
+                int productId = product.getId();
+                sellingCompanyOrder.setProductId(productId);
+                entityManager.merge(sellingCompanyOrder);
+            }
+
             entityManager.merge(customerOrder);
             return Response.status(Response.Status.CREATED).build();
         } catch (Exception e) {
