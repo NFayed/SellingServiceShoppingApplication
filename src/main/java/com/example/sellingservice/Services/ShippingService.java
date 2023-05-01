@@ -4,12 +4,17 @@ import com.example.sellingservice.Entities.CustomerOrder;
 import com.example.sellingservice.Entities.Product;
 import com.example.sellingservice.Entities.SellingCompanyOrder;
 import com.example.sellingservice.Entities.ShippingCompany;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.Serializable;
@@ -56,7 +61,15 @@ public class ShippingService implements Serializable {
     public Response shipOrder(CustomerOrder customerOrder) {
         try {
             customerOrder.setShipped(true);
+            String externalApiUrl = "https://customerservice-lepf.onrender.com/shipOrder"; // Replace this with the actual API URL
+            Client client = ClientBuilder.newClient();
+            ObjectMapper objectMapper = new ObjectMapper();
+            String customerOrderJson = objectMapper.writeValueAsString(customerOrder);
 
+            // Send the POST request with the CustomerOrder in the body
+            Response response = client.target(externalApiUrl)
+                    .request(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(customerOrderJson, MediaType.APPLICATION_JSON));
             for (Product product : customerOrder.getProducts()) {
                 SellingCompanyOrder sellingCompanyOrder = new SellingCompanyOrder();
                 sellingCompanyOrder.setShippingCompanyName(customerOrder.getShippingCompany().getUsername());

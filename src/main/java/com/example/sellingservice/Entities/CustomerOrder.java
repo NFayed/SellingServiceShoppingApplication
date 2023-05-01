@@ -20,6 +20,16 @@ public class CustomerOrder implements Serializable {
     boolean shipped;
     int total;
     boolean completed;
+
+    public String get_id() {
+        return _id;
+    }
+
+    public void set_id(String _id) {
+        this._id = _id;
+    }
+
+    String _id;
     private String customerName;
 
     public String getCustomerAddress() {
