@@ -112,10 +112,17 @@ import java.util.*;
         @Path("getallshipping")
         @Produces(MediaType.APPLICATION_JSON)
         public List<ShippingCompany> getAllShippingCompaniesByAdminId() {
-            TypedQuery<ShippingCompany> query = entityManager.createQuery(
-                    "SELECT sc FROM ShippingCompany sc WHERE sc.admin.id = :adminId", ShippingCompany.class);
-            query.setParameter("adminId", admin.getId());
-            return query.getResultList();
+            try {
+                TypedQuery<ShippingCompany> query = entityManager.createQuery(
+                        "SELECT sc FROM ShippingCompany sc WHERE sc.admin.id = :adminId", ShippingCompany.class);
+                query.setParameter("adminId", admin.getId());
+                return query.getResultList();
+            } catch (Exception e) {
+                // Handle the exception or log the error message
+                e.printStackTrace();
+                // Return an empty list or a custom error response
+                return new ArrayList<>();
+            }
         }
         @GET
         @Path("getallcustomers")
