@@ -45,7 +45,6 @@ public class    SellingService  extends Application implements Serializable{
 
     //1. Login into the system using the generated credentials as sent by the admin
     @POST
-//@RolesAllowed({"SellingCompany"})
     @Path("login")
     public Response login(SellingInput s,  @Context HttpServletRequest request) {
         SellingCompany selling;
@@ -112,7 +111,7 @@ public class    SellingService  extends Application implements Serializable{
                 System.out.println("Selling company is null");
             }
         }
-        return "Invalid product.";
+        return "not logged in.";
     }
 
 

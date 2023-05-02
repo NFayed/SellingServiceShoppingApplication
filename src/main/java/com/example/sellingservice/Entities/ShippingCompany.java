@@ -1,5 +1,7 @@
 package com.example.sellingservice.Entities;
 
+import jakarta.ejb.Stateful;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -10,6 +12,8 @@ import java.util.Set;
 
 @Entity
 @Table(name="Shipping Company")
+@Stateful
+@SessionScoped
 public class ShippingCompany implements Serializable {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

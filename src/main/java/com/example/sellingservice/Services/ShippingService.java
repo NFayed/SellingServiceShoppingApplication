@@ -7,18 +7,14 @@ import com.example.sellingservice.Entities.ShippingCompany;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ejb.Stateful;
 import jakarta.ejb.Stateless;
-import jakarta.enterprise.context.SessionScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -28,7 +24,6 @@ import java.util.List;
 
 @Path("shipping")
 @Stateful
-@SessionScoped
 public class ShippingService implements Serializable {
     EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("default");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -36,15 +31,12 @@ public class ShippingService implements Serializable {
 
     @POST
     @Path("login")
-    public String login(AdminInput a,@Context HttpServletRequest request) {
-        ShippingCompany shippingCompany ;
-
+    public long login(AdminInput a) {
+        ShippingCompany shippingCompany;
         shippingCompany = getShippingByName(a.getUsername());
         if (shippingCompany != null) {
             if (shippingCompany.getPassword().equals(a.getPassword())) {
-                HttpSession session = request.getSession(true);
-                session.setAttribute("shipping", shippingCompany);
-                return "shipping company logged in";
+                return shippingCompany.getId(); // Return the shipping company id
             } else {
                 throw new WebApplicationException(Response.Status.BAD_REQUEST);
             }
@@ -52,6 +44,7 @@ public class ShippingService implements Serializable {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
     }
+
 
     public ShippingCompany getShippingByName(String username) {
         try {
@@ -70,15 +63,19 @@ public class ShippingService implements Serializable {
     public Response shipOrder(CustomerOrder customerOrder) {
         try {
             customerOrder.setShipped(true);
-            String externalApiUrl = "https://customerservice-lepf.onrender.com/shipOrder"; // Replace this with the actual API URL
+            String externalApiUrl = "http://localhost:4000/shipOrder"; // Replace this with the actual API URL
             Client client = ClientBuilder.newClient();
             ObjectMapper objectMapper = new ObjectMapper();
             String customerOrderJson = objectMapper.writeValueAsString(customerOrder);
+            System.out.println("CustomerOrder: " + customerOrderJson);
+            System.out.println("External API URL: " + externalApiUrl);
 
             // Send the POST request with the CustomerOrder in the body
             Response response = client.target(externalApiUrl)
                     .request(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(customerOrderJson, MediaType.APPLICATION_JSON));
+            System.out.println("Response: " + response.getStatus());
+
             for (Product product : customerOrder.getProducts()) {
                 SellingCompanyOrder sellingCompanyOrder = new SellingCompanyOrder();
                 sellingCompanyOrder.setShippingCompanyName(customerOrder.getShippingCompany().getUsername());
@@ -98,23 +95,51 @@ public class ShippingService implements Serializable {
 
 
 
-    @GET
-    @Path("getOrderRequests")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<CustomerOrder> getOrderRequests( @Context HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            ShippingCompany shippingCompany = (ShippingCompany) session.getAttribute("shipping");
-            if (shippingCompany != null) {
-                TypedQuery<CustomerOrder> query = entityManager.createQuery(
-                                "SELECT u from CustomerOrder u WHERE u.shippingCompany = :shippingCompany AND u.shipped = false",
-                                CustomerOrder.class)
-                        .setParameter("shippingCompany", shippingCompany);
-
-                return query.getResultList();
-            }
+    public Response addOrderRequest(CustomerOrder customerOrder) {
+        try {
+//            customerOrder.getProducts().forEach(product -> {
+//                product.setShippingCompany(shippingCompany);
+//                System.out.println("Product: " + product.getName());
+//                product.setQuantity(product.getQuantity() - 1);
+//                if (product.getQuantity() == 0) {
+//                    product.setIsAvailableForSale(false);
+//                }
+//                entityManager.merge(product);
+//            });
+//            customerOrder.setShippingCompany(shippingCompany);
+            customerOrder.setCompleted(true);
+            customerOrder.setShipped(false);
+            entityManager.getTransaction().begin();
+            entityManager.persist(customerOrder);
+            entityManager.getTransaction().commit();
+            return Response.status(Response.Status.CREATED).build();
+        } catch (Exception e) {
+            entityManager.getTransaction().rollback();
+            return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        return Collections.emptyList();
+    }
+
+    @GET
+    @Path("getOrderRequests/{shippingCompanyId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<CustomerOrder> getOrderRequests(@PathParam("shippingCompanyId") long shippingCompanyId) {
+        try {
+            ShippingCompany shippingCompany = entityManager.find(ShippingCompany.class, shippingCompanyId);
+
+            if (shippingCompany == null) {
+                return Collections.emptyList();
+            }
+
+            TypedQuery<CustomerOrder> query = entityManager.createQuery(
+                            "SELECT u from CustomerOrder u WHERE u.shippingCompany = :shippingCompany AND u.shipped = false",
+                            CustomerOrder.class)
+                    .setParameter("shippingCompany", shippingCompany);
+
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
